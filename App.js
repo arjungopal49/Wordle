@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import { StatusBar } from 'expo-status-bar';
-import {Alert, StyleSheet, Text, View} from 'react-native';
+import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { colors, CLEAR, ENTER} from "./Wordle Assets/src/constants";
 import Keyboard from "./Wordle Assets/src/components/Keyboard";
 import {ScrollView} from "react-native-web";
@@ -12,6 +12,11 @@ const copyArray = (arr) => {
 };
 
 export default function App() {
+
+  const [currentScreen, setScreen] = useState("menu");
+  const [score, setScore] = useState(50);
+  const [hasPlayed, setPlayed] = useState(false);
+
   const word = "arjun";
   const letters = word.split('');
 
@@ -21,6 +26,18 @@ export default function App() {
   const [curCol, setCurCol] = useState(0);
   const [gameState, setGameState] = useState('playing');
 
+  const onPress = () => {
+    if(true) {
+      setScreen("game");
+    }
+    else {
+      Alert.alert("YOU CANT", "you already played the game today")
+    }
+  }
+  const onPress2 = () => {
+    setScreen("menu");
+  }
+
   useEffect(() => {
     if (curRow > 0) {
       checkGameState();
@@ -29,17 +46,23 @@ export default function App() {
 
   const checkGameState = () => {
     if (checkIfWon()) {
+      // setScore(32 + (curRow)*14))
       Alert.alert("GAME OVER", "You win")
       setGameState('won')
       setTimeout(() => {
         clearBoard();
         }, 1000);
+      setScreen("result")
+      setPlayed(true)
     } else if (checkIfLost()) {
+      setScore(0)
       Alert.alert("GAME OVER", "You lose")
       setGameState('lost')
       setTimeout(() => {
         clearBoard();
       }, 1000);
+      setScreen("result")
+      setPlayed(true)
     }
   }
 
@@ -58,7 +81,7 @@ export default function App() {
 
   const checkIfWon = () => {
     const row = rows[curRow - 1];
-
+    setScore(30 + ((6-curRow)*14))
     return row.every((letter, i) => letter === letters[i])
   }
 
@@ -123,41 +146,86 @@ export default function App() {
   const greenCaps = getAllLettersWithColor(colors.primary)
   const yellowCaps = getAllLettersWithColor(colors.secondary)
   const greyCaps = getAllLettersWithColor(colors.darkgrey)
+  if(currentScreen === "menu"){
+    return (
+        <View style={styles.menuContainer}>
+          <View>
+            <Text style={styles.menuTittleText}>PUZLER</Text>
+          </View>
+          <TouchableOpacity
+              style={styles.menuButton}
+              onPress={onPress}
+          >
+            <Text style={styles.menuButtonText}>PLAY</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+              style={styles.menuButton}
+          >
+            <Text style={styles.menuButtonText}>SOCIAL</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+              style={styles.menuButton}
+          >
+            <Text style={styles.menuButtonText}>LEADERBOARD</Text>
+          </TouchableOpacity>
+        </View>
+    );
+  }
+  else if(currentScreen === "game"){
+    return (
+        <View style={styles.container}>
+          <StatusBar style="Light" />
 
-  return (
-    <View style={styles.container}>
-      <StatusBar style="Light" />
+          <Text style = {styles.title}>PUZLER</Text>
 
-      <Text style = {styles.title}>WORDLE</Text>
+          <View style={styles.map}>
 
-      <View style={styles.map}>
+            {rows.map((row, i) => (
+                <View  key = {`row-${i}`}  style={styles.row}>
+                  {row.map((letter, j) => (
+                      <View
+                          key = {`cell-${i}-${j}`}
+                          style={[styles.cell,
+                            {
+                              borderColor: isCellActive(i, j) ? colors.lightgrey: colors.darkgrey,
+                              backgroundColor: getCellBGColor(i, j)
 
-        {rows.map((row, i) => (
-            <View  key = {`row-${i}`}  style={styles.row}>
-              {row.map((letter, j) => (
-                  <View
-                      key = {`cell-${i}-${j}`}
-                      style={[styles.cell,
-                        {
-                          borderColor: isCellActive(i, j) ? colors.lightgrey: colors.darkgrey,
-                          backgroundColor: getCellBGColor(i, j)
+                            }]
+                          }>
 
-                        }]
-                      }>
+                        <Text style = {styles.cellText}>{letter.toUpperCase()}</Text>
 
-                    <Text style = {styles.cellText}>{letter.toUpperCase()}</Text>
+                      </View>
+                  ))}
 
-                  </View>
-              ))}
+                </View>
+            ))}
 
-            </View>
-        ))}
+          </View>
 
+          <Keyboard onKeyPressed={onKeyPressed} greenCaps={greenCaps} yellowCaps={yellowCaps} greyCaps={greyCaps}/>
+        </View>
+    );
+  }
+  else if(currentScreen === "result") {
+    return (
+        <View style={styles.menuContainer}>
+      <View>
+        <Text style={styles.menuTittleText}>GOOD JOB</Text>
       </View>
+          <View>
+            <Text style={styles.subscript}>you got a score of score {score}</Text>
+          </View>
+      <TouchableOpacity
+          style={styles.menuButton}
+          onPress={onPress2}
+      >
+        <Text style={styles.menuButtonText}>BACK TO MENU</Text>
+      </TouchableOpacity>
 
-      <Keyboard onKeyPressed={onKeyPressed} greenCaps={greenCaps} yellowCaps={yellowCaps} greyCaps={greyCaps}/>
     </View>
-  );
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -173,6 +241,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     letterSpacing: 7,
+    marginTop:50
   },
 
   map: {
@@ -199,5 +268,45 @@ const styles = StyleSheet.create({
     color: colors.lightgrey,
     fontWeight: "bold",
     fontSize: 28,
+  },menuContainer: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    backgroundColor: "#111111"
+
+  },
+  menuButton: {
+    alignItems: "center",
+    backgroundColor: "#fa9819",
+    padding: 40,
+    marginHorizontal: 20,
+    height: 20,
+    marginTop: 40,
+
+  },
+  menuTittleText: {
+    fontSize:70,
+    marginTop:0,
+    marginBottom:20,
+    alignItems: 'center',
+    textAlign:'center',
+    color:"#dddddd"
+  },
+  subscript: {
+    fontSize:30,
+    marginTop:0,
+    marginBottom:20,
+    alignItems: 'center',
+    textAlign:'center',
+    color:"#dddddd"
+  },
+  menuButtonText: {
+    fontFamily: "Courier New",
+    position: 'relative',
+    height: 20,
+    fontSize:20,
+    alignItems: 'center',
+    justifyContent: 'center',
+
   }
 });

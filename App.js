@@ -17,7 +17,7 @@ export default function App() {
   const [score, setScore] = useState(50);
   const [hasPlayed, setPlayed] = useState(false);
 
-  const word = "arjun";
+  const word = "hello";
   const letters = word.split('');
 
   const [rows, setRows] = useState(new Array(NUMBER_OF_TRIES).fill(new Array(letters.length).fill("")));
@@ -25,6 +25,7 @@ export default function App() {
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
   const [gameState, setGameState] = useState('playing');
+  const [data, setData] = useState([]);
 
   const onPress = () => {
     if(true) {
@@ -108,8 +109,29 @@ export default function App() {
 
     if (key === ENTER) {
       if (curCol === rows[0].length) {
-        setCurRow(curRow+1);
-        setCurCol(0);
+
+        const guess = rows[curRow].join("");
+        console.log(guess);
+        const url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + guess;
+
+        fetch(url)
+            .then((response) => response.json())
+            .then((responseJson) => {
+              console.log(responseJson);
+              if (responseJson["title"] === "No Definitions Found") {
+                Alert.alert("SORRY", "This word does not exist")
+                updatedRows[curRow][curCol - 1] = "";
+                setRows(updatedRows);
+                setCurCol(curCol - 1);
+              } else {
+                setCurRow(curRow+1);
+                setCurCol(0);
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+
       }
       return;
     }

@@ -4,12 +4,29 @@ import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { colors, CLEAR, ENTER} from "./Wordle Assets/src/constants";
 import Keyboard from "./Wordle Assets/src/components/Keyboard";
 import {ScrollView} from "react-native-web";
+import firestore from '@react-native-firebase/firestore';
+
+const playersCollection = firestore().collection('Players');
+const lobbiesCollection = firestore().collection('Lobbies');
+
 
 const NUMBER_OF_TRIES = 6;
 
 const copyArray = (arr) => {
   return [... arr.map((rows) => [...rows])];
 };
+
+const usersCollection = firestore()
+    .collection('Players')
+    .get()
+    .then(collectionSnapshot => {
+      console.log('Total players: ', collectionSnapshot.size);
+      collectionSnapshot
+          .forEach(documentSnapshot => {
+            console.log('Player ID: ', documentSnapshot.id,
+                documentSnapshot.data());
+          });
+    });
 
 export default function App() {
 

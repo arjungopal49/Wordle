@@ -4,10 +4,38 @@ import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { colors, CLEAR, ENTER} from "./Wordle Assets/src/constants";
 import Keyboard from "./Wordle Assets/src/components/Keyboard";
 import {ScrollView} from "react-native-web";
-import firestore from '@react-native-firebase/firestore';
 
-const playersCollection = firestore().collection('Players');
-const lobbiesCollection = firestore().collection('Lobbies');
+
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import {getFirestore} from "firebase/firestore";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyApikzPx0NjZ1iD85T2dO95yq4W9TJkGHU",
+  authDomain: "puzler-9575d.firebaseapp.com",
+  databaseURL: "https://puzler-9575d-default-rtdb.firebaseio.com",
+  projectId: "puzler-9575d",
+  storageBucket: "puzler-9575d.appspot.com",
+  messagingSenderId: "397073809979",
+  appId: "1:397073809979:web:81f797f79f96b36bc4921e",
+  measurementId: "G-H8DTT09BM8"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const firestore = getFirestore(app);
+
+
+
+const playersCollection = firestore.collection('Players');
+const lobbiesCollection = firestore.collection('Lobbies');
 
 
 const NUMBER_OF_TRIES = 6;
@@ -16,7 +44,7 @@ const copyArray = (arr) => {
   return [... arr.map((rows) => [...rows])];
 };
 
-const usersCollection = firestore()
+const usersCollection = firestore
     .collection('Players')
     .get()
     .then(collectionSnapshot => {
